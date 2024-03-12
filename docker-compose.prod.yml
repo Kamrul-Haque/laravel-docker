@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+    app:
+        container_name: elearning-app
+        build:
+            context: .
+            dockerfile: ./docker/php/Dockerfileprod
+            target: php
+            args:
+                - APP_ENV=${APP_ENV}
+        environment:
+            - APP_ENV=${APP_ENV}
+        ports:
+            - '9000:9000'
+        volumes:
+            - ./:/var/www
+        networks:
+            - elearning
+    nginx:
+        image: nginx:stable-alpine
+        container_name: elearning-nginx
+        ports:
+          - '${APP_PORT}:${APP_PORT}'
+        environment:
+          PORT: '${APP_PORT}'
+          DOMAIN: '${DOMAIN}'
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/templates:/etc/nginx/templates
+        networks:
+            - elearning
+        depends_on:
+            - app
+    node:
+        image: node:18
+        container_name: elearning-node
+        volumes:
+            - ./:/var/www/
+        working_dir: /var/www/
+        tty: true
+        networks:
+            - elearning
+networks:
+    elearning:
+        driver: bridge

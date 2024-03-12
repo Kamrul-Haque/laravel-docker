@@ -1,0 +1,86 @@
+version: "3.8"
+services:
+    app:
+        container_name: elearning-app
+        build:
+            context: .
+            dockerfile: ./docker/php/Dockerfile
+            target: php
+            args:
+                - APP_ENV=${APP_ENV}
+        environment:
+            - APP_ENV=${APP_ENV}
+        expose:
+            - '9000'
+        volumes:
+            - ./:/var/www
+        networks:
+            - elearning
+        depends_on:
+            - mysql
+    nginx:
+        image: nginx:stable-alpine
+        container_name: elearning-nginx
+        ports:
+            - '${APP_PORT}:${APP_PORT}'
+        environment:
+            PORT: '${APP_PORT}'
+            DOMAIN: '${DOMAIN}'
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/templates:/etc/nginx/templates
+        networks:
+            - elearning
+        depends_on:
+            - app
+    mysql:
+        image: 'mysql/mysql-server:8.0'
+        container_name: elearning-mysql
+        environment:
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_TCP_PORT: '${DB_PORT}'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        expose:
+            - "${DB_PORT}"
+        volumes:
+            - 'mysql-data:/var/lib/mysql'
+        networks:
+            - elearning
+    node:
+        image: node:18
+        container_name: elearning-node
+        volumes:
+            - ./:/var/www/
+        working_dir: /var/www/
+        tty: true
+        networks:
+            - elearning
+    phpmyadmin:
+        image: 'phpmyadmin/phpmyadmin:5.2'
+        container_name: elearning-phpmyadmin
+        links:
+            - mysql:mysql
+        expose:
+            - '${PHPMYADMIN_PORT}'
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: "${DB_PORT}"
+            PMA_ABSOLUTE_URI: "${APP_URL}/phpmyadmin/"
+            PMA_PMADB: phpmyadmin
+            MYSQL_USERNAME: "${DB_USERNAME}"
+            MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+            UPLOAD_LIMIT: 1G
+        networks:
+            - elearning
+        depends_on:
+            - mysql
+volumes:
+    mysql-data:
+        driver: local
+networks:
+    elearning:
+        driver: bridge
