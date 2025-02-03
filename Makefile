@@ -60,6 +60,9 @@ tinker: ## Launch tinker cli
 artisan: ## Run an artisan command
 	@docker compose exec ${SERVICE_PHP} php artisan $(filter-out $@,$(MAKECMDGOALS))
 
+pa: ## Run an artisan command
+	@docker compose exec ${SERVICE_PHP} php artisan $(filter-out $@,$(MAKECMDGOALS))
+
 dump-autoload: ## Dump composer autoload files.
 	docker compose exec ${SERVICE_PHP} composer dump -o
 
