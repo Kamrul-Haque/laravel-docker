@@ -1,7 +1,7 @@
 version: "3.8"
 services:
     app:
-        container_name: elearning-app
+        container_name: laravel-app
         build:
             context: .
             dockerfile: ./docker/php/Dockerfile
@@ -15,12 +15,12 @@ services:
         volumes:
             - ./:/var/www
         networks:
-            - elearning
+            - laravel
         depends_on:
             - mysql
     nginx:
         image: nginx:stable-alpine
-        container_name: elearning-nginx
+        container_name: laravel-nginx
         ports:
             - '${APP_PORT}:${APP_PORT}'
         environment:
@@ -30,12 +30,12 @@ services:
             - ./:/var/www
             - ./docker/nginx/templates:/etc/nginx/templates
         networks:
-            - elearning
+            - laravel
         depends_on:
             - app
     mysql:
         image: 'mysql/mysql-server:8.0'
-        container_name: elearning-mysql
+        container_name: laravel-mysql
         environment:
             MYSQL_ROOT_HOST: '%'
             MYSQL_TCP_PORT: '${DB_PORT}'
@@ -49,19 +49,19 @@ services:
         volumes:
             - 'mysql-data:/var/lib/mysql'
         networks:
-            - elearning
+            - laravel
     node:
-        image: node:18
-        container_name: elearning-node
+        image: node:23-alpine
+        container_name: laravel-node
         volumes:
             - ./:/var/www/
         working_dir: /var/www/
         tty: true
         networks:
-            - elearning
+            - laravel
     phpmyadmin:
         image: 'phpmyadmin/phpmyadmin:5.2'
-        container_name: elearning-phpmyadmin
+        container_name: laravel-phpmyadmin
         links:
             - mysql:mysql
         expose:
@@ -75,12 +75,12 @@ services:
             MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
             UPLOAD_LIMIT: 1G
         networks:
-            - elearning
+            - laravel
         depends_on:
             - mysql
 volumes:
     mysql-data:
         driver: local
 networks:
-    elearning:
+    laravel:
         driver: bridge

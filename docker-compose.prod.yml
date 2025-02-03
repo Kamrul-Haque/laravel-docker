@@ -1,7 +1,7 @@
 version: "3.8"
 services:
     app:
-        container_name: elearning-app
+        container_name: laravel-app
         build:
             context: .
             dockerfile: ./docker/php/Dockerfileprod
@@ -15,10 +15,10 @@ services:
         volumes:
             - ./:/var/www
         networks:
-            - elearning
+            - laravel
     nginx:
         image: nginx:stable-alpine
-        container_name: elearning-nginx
+        container_name: laravel-nginx
         ports:
           - '${APP_PORT}:${APP_PORT}'
         environment:
@@ -28,18 +28,18 @@ services:
             - ./:/var/www
             - ./docker/nginx/templates:/etc/nginx/templates
         networks:
-            - elearning
+            - laravel
         depends_on:
             - app
     node:
-        image: node:18
-        container_name: elearning-node
+        image: node:23-alpine
+        container_name: laravel-node
         volumes:
             - ./:/var/www/
         working_dir: /var/www/
         tty: true
         networks:
-            - elearning
+            - laravel
 networks:
-    elearning:
+    laravel:
         driver: bridge

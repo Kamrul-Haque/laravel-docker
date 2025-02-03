@@ -1,5 +1,5 @@
 # Used for DEV & Local.
-FROM php:8.1-fpm as php
+FROM php:8.3-fpm as php
 
 # Set environment variables
 ENV PHP_OPCACHE_ENABLE=0
